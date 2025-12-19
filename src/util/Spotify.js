@@ -68,24 +68,67 @@ const Spotify = {
       return Promise.reject(new Error('Playlist name and tracks are required'));
     }
 
-    // Mock implementation - simulates API call
-    // TODO: Replace with actual Spotify API integration
-    console.log('=== Saving Playlist to Spotify ===');
-    console.log('Playlist Name:', playlistName);
-    console.log('Track URIs:', trackUris);
-    console.log('Number of tracks:', trackUris.length);
-    console.log('==================================');
+    const accessToken = Spotify.getAccessToken();
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    };
 
-    // Simulate async API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          success: true,
-          playlistId: 'mock-playlist-' + Date.now(),
-          message: `Playlist "${playlistName}" saved with ${trackUris.length} tracks`
+    let userId;
+
+    // Step 1: Get the current user's Spotify ID
+    return fetch('https://api.spotify.com/v1/me', { headers })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to get user profile');
+        }
+        return response.json();
+      })
+      .then((jsonResponse) => {
+        userId = jsonResponse.id;
+
+        // Step 2: Create a new playlist with the custom name
+        return fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+          headers,
+          method: 'POST',
+          body: JSON.stringify({
+            name: playlistName,
+            description: 'Created with Jammming',
+            public: true
+          })
         });
-      }, 500);
-    });
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to create playlist');
+        }
+        return response.json();
+      })
+      .then((jsonResponse) => {
+        const playlistId = jsonResponse.id;
+
+        // Step 3: Add tracks to the new playlist
+        return fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+          headers,
+          method: 'POST',
+          body: JSON.stringify({
+            uris: trackUris
+          })
+        });
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to add tracks to playlist');
+        }
+        return response.json();
+      })
+      .then((jsonResponse) => {
+        return {
+          success: true,
+          snapshotId: jsonResponse.snapshot_id,
+          message: `Playlist "${playlistName}" saved with ${trackUris.length} tracks`
+        };
+      });
   }
 };
 
