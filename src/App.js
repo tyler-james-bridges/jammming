@@ -74,10 +74,14 @@ function App() {
   const [playlistTracks, setPlaylistTracks] = useState(hardcodedPlaylistTracks);
 
   const addTrack = (track) => {
+    // Prevent adding duplicate tracks
     if (playlistTracks.find((savedTrack) => savedTrack.id === track.id)) {
       return;
     }
+    // Add track to playlist
     setPlaylistTracks([...playlistTracks, track]);
+    // Remove track from search results to show it's been added
+    setSearchResults(searchResults.filter((result) => result.id !== track.id));
   };
 
   const removeTrack = (track) => {
