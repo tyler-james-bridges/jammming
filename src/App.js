@@ -85,7 +85,10 @@ function App() {
   };
 
   const removeTrack = (track) => {
+    // Remove track from playlist
     setPlaylistTracks(playlistTracks.filter((savedTrack) => savedTrack.id !== track.id));
+    // Add track back to search results so it can be re-added
+    setSearchResults([...searchResults, track]);
   };
 
   const updatePlaylistName = (name) => {
