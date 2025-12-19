@@ -1,78 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchBar from './components/SearchBar/SearchBar';
 import SearchResults from './components/SearchResults/SearchResults';
 import Playlist from './components/Playlist/Playlist';
 import Spotify from './util/Spotify';
 import './App.css';
 
-// Hardcoded track data to simulate Spotify API response
-const hardcodedSearchResults = [
-  {
-    id: '1',
-    name: 'Bohemian Rhapsody',
-    artist: 'Queen',
-    album: 'A Night at the Opera',
-    uri: 'spotify:track:1'
-  },
-  {
-    id: '2',
-    name: 'Hotel California',
-    artist: 'Eagles',
-    album: 'Hotel California',
-    uri: 'spotify:track:2'
-  },
-  {
-    id: '3',
-    name: 'Stairway to Heaven',
-    artist: 'Led Zeppelin',
-    album: 'Led Zeppelin IV',
-    uri: 'spotify:track:3'
-  },
-  {
-    id: '4',
-    name: 'Imagine',
-    artist: 'John Lennon',
-    album: 'Imagine',
-    uri: 'spotify:track:4'
-  },
-  {
-    id: '5',
-    name: 'Smells Like Teen Spirit',
-    artist: 'Nirvana',
-    album: 'Nevermind',
-    uri: 'spotify:track:5'
-  },
-  {
-    id: '6',
-    name: 'Billie Jean',
-    artist: 'Michael Jackson',
-    album: 'Thriller',
-    uri: 'spotify:track:6'
-  }
-];
-
-// Hardcoded playlist tracks to demonstrate playlist display
-const hardcodedPlaylistTracks = [
-  {
-    id: '7',
-    name: 'Purple Rain',
-    artist: 'Prince',
-    album: 'Purple Rain',
-    uri: 'spotify:track:7'
-  },
-  {
-    id: '8',
-    name: 'Sweet Child O\' Mine',
-    artist: 'Guns N\' Roses',
-    album: 'Appetite for Destruction',
-    uri: 'spotify:track:8'
-  }
-];
-
 function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [playlistName, setPlaylistName] = useState('New Playlist');
   const [playlistTracks, setPlaylistTracks] = useState([]);
+
+  // Handle OAuth callback - exchange code for token on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('code')) {
+      // Exchange the code for a token
+      Spotify.getAccessToken();
+    }
+  }, []);
 
   const addTrack = (track) => {
     // Prevent adding duplicate tracks
