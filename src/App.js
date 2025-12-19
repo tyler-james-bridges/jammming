@@ -70,9 +70,9 @@ const hardcodedPlaylistTracks = [
 ];
 
 function App() {
-  const [searchResults, setSearchResults] = useState(hardcodedSearchResults);
-  const [playlistName, setPlaylistName] = useState('My Playlist');
-  const [playlistTracks, setPlaylistTracks] = useState(hardcodedPlaylistTracks);
+  const [searchResults, setSearchResults] = useState([]);
+  const [playlistName, setPlaylistName] = useState('New Playlist');
+  const [playlistTracks, setPlaylistTracks] = useState([]);
 
   const addTrack = (track) => {
     // Prevent adding duplicate tracks
@@ -113,8 +113,8 @@ function App() {
         // Reset playlist after successful save
         setPlaylistName('New Playlist');
         setPlaylistTracks([]);
-        // Reset search results to original
-        setSearchResults(hardcodedSearchResults);
+        // Clear search results
+        setSearchResults([]);
       })
       .catch((error) => {
         alert('Failed to save playlist. Please try again.');
@@ -123,8 +123,22 @@ function App() {
   };
 
   const search = (term) => {
-    // TODO: Implement Spotify search
-    console.log('Searching for:', term);
+    if (!term) {
+      return;
+    }
+
+    Spotify.search(term)
+      .then((results) => {
+        // Filter out tracks that are already in the playlist
+        const filteredResults = results.filter(
+          (track) => !playlistTracks.find((playlistTrack) => playlistTrack.id === track.id)
+        );
+        setSearchResults(filteredResults);
+      })
+      .catch((error) => {
+        console.error('Search error:', error);
+        alert('Failed to search. Please try again.');
+      });
   };
 
   return (
