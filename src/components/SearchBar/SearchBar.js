@@ -24,7 +24,7 @@ function SearchBar({ onSearch }) {
         placeholder="Enter A Song, Album, or Artist"
         value={term}
         onChange={handleTermChange}
-        onKeyPress={handleKeyPress}
+        onKeyDown={handleKeyPress}
       />
       <button className="SearchButton" onClick={handleSearch}>
         SEARCH
