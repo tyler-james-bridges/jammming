@@ -1,21 +1,62 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import SearchBar from './components/SearchBar/SearchBar';
+import SearchResults from './components/SearchResults/SearchResults';
+import Playlist from './components/Playlist/Playlist';
 import './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+function App() {
+  const [searchResults, setSearchResults] = useState([]);
+  const [playlistName, setPlaylistName] = useState('New Playlist');
+  const [playlistTracks, setPlaylistTracks] = useState([]);
+
+  const addTrack = (track) => {
+    if (playlistTracks.find((savedTrack) => savedTrack.id === track.id)) {
+      return;
+    }
+    setPlaylistTracks([...playlistTracks, track]);
+  };
+
+  const removeTrack = (track) => {
+    setPlaylistTracks(playlistTracks.filter((savedTrack) => savedTrack.id !== track.id));
+  };
+
+  const updatePlaylistName = (name) => {
+    setPlaylistName(name);
+  };
+
+  const savePlaylist = () => {
+    const trackUris = playlistTracks.map((track) => track.uri);
+    // TODO: Save playlist to Spotify
+    console.log('Saving playlist:', playlistName, trackUris);
+    setPlaylistName('New Playlist');
+    setPlaylistTracks([]);
+  };
+
+  const search = (term) => {
+    // TODO: Implement Spotify search
+    console.log('Searching for:', term);
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>Ja<span className="highlight">mmm</span>ing</h1>
+      </header>
+      <div className="App-content">
+        <SearchBar onSearch={search} />
+        <div className="App-playlist">
+          <SearchResults searchResults={searchResults} onAdd={addTrack} />
+          <Playlist
+            playlistName={playlistName}
+            playlistTracks={playlistTracks}
+            onRemove={removeTrack}
+            onNameChange={updatePlaylistName}
+            onSave={savePlaylist}
+          />
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default App;
