@@ -32,6 +32,35 @@ const Spotify = {
     }
   },
 
+  // Search Spotify for tracks matching the search term
+  search(term) {
+    const accessToken = Spotify.getAccessToken();
+
+    return fetch(`https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(term)}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Search request failed');
+        }
+        return response.json();
+      })
+      .then((jsonResponse) => {
+        if (!jsonResponse.tracks) {
+          return [];
+        }
+        return jsonResponse.tracks.items.map((track) => ({
+          id: track.id,
+          name: track.name,
+          artist: track.artists[0].name,
+          album: track.album.name,
+          uri: track.uri
+        }));
+      });
+  },
+
   // Save playlist to user's Spotify account
   // Returns a promise that resolves when the playlist is saved
   savePlaylist(playlistName, trackUris) {
