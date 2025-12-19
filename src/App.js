@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import SearchBar from './components/SearchBar/SearchBar';
 import SearchResults from './components/SearchResults/SearchResults';
 import Playlist from './components/Playlist/Playlist';
+import Spotify from './util/Spotify';
 import './App.css';
 
 // Hardcoded track data to simulate Spotify API response
@@ -74,14 +75,21 @@ function App() {
   const [playlistTracks, setPlaylistTracks] = useState(hardcodedPlaylistTracks);
 
   const addTrack = (track) => {
+    // Prevent adding duplicate tracks
     if (playlistTracks.find((savedTrack) => savedTrack.id === track.id)) {
       return;
     }
+    // Add track to playlist
     setPlaylistTracks([...playlistTracks, track]);
+    // Remove track from search results to show it's been added
+    setSearchResults(searchResults.filter((result) => result.id !== track.id));
   };
 
   const removeTrack = (track) => {
+    // Remove track from playlist
     setPlaylistTracks(playlistTracks.filter((savedTrack) => savedTrack.id !== track.id));
+    // Add track back to search results so it can be re-added
+    setSearchResults([...searchResults, track]);
   };
 
   const updatePlaylistName = (name) => {
@@ -89,11 +97,29 @@ function App() {
   };
 
   const savePlaylist = () => {
+    // Don't save empty playlists
+    if (!playlistTracks.length) {
+      alert('Please add tracks to your playlist before saving.');
+      return;
+    }
+
+    // Create array of track URIs for Spotify API
     const trackUris = playlistTracks.map((track) => track.uri);
-    // TODO: Save playlist to Spotify
-    console.log('Saving playlist:', playlistName, trackUris);
-    setPlaylistName('New Playlist');
-    setPlaylistTracks([]);
+
+    // Save playlist to Spotify (currently mocked)
+    Spotify.savePlaylist(playlistName, trackUris)
+      .then((response) => {
+        alert(`Playlist "${playlistName}" saved successfully!`);
+        // Reset playlist after successful save
+        setPlaylistName('New Playlist');
+        setPlaylistTracks([]);
+        // Reset search results to original
+        setSearchResults(hardcodedSearchResults);
+      })
+      .catch((error) => {
+        alert('Failed to save playlist. Please try again.');
+        console.error('Save playlist error:', error);
+      });
   };
 
   const search = (term) => {
